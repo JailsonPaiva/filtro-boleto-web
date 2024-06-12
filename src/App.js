@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import logo from './assets/logo.png';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   const [remessa, setRemessa] = useState('');
@@ -8,6 +10,7 @@ const App = () => {
 
   const [cnpj, setCnpj] = useState('');
   const [nomeCnpj, setNomeCnpj] = useState('');
+
 
   const handleRemessaFileUpload = (event) => {
     const file = event.target.files[0];
@@ -37,21 +40,29 @@ const App = () => {
     }
   };
 
-  const handleDownload = async () => {
+  const handleSendFile = async () => {
+    if (!remessa || !cnpj){
+      toast.error('Por favor, selecione todos os campos');
+      return;
+    } 
     try {
       const response = await axios.post('http://localhost:5000/upload-arquivos', {
         remessa,
         cnpj,
+        nomeRemessa,
       });
-      // Aqui você pode fazer algo com a resposta da API, como fazer o download do arquivo filtrado
-      console.log('Resposta da API:', response.data);
+
+      if (response.status === 200) {
+        toast.success('Arquivo processado com sucesso. O arquivo foi salvo na pasta Downloads.');
+      }
     } catch (error) {
+      toast.error('Erro ao processar os arquivos.');
       console.error('Erro ao fazer a requisição:', error);
     }
   };
 
   return (
-    <body className='pb-9 flex flex-col justify-center items-center gap-10'>
+    <div className='pb-9 flex flex-col justify-center items-center gap-10'>
       <header className='bg-gradient-to-r from-[#0F2E99] to-[#39B1E3] w-full flex justify-between items-center px-12 py-3'>
         <img src={logo} alt='Logo Desenvolve MT' />
         <h1 className='text-4xl text-white'>Filtrar arquivo de Remessa</h1>
@@ -59,8 +70,8 @@ const App = () => {
 
       <section className='w-[80%] max-w-[80%] flex justify-between gap-8 p-4'>
 
-        <div className='flex flex-col justify-center items-center gap-2'>
-          <label htmlFor="remessa-file" className='text-xl mb-2 '>Selecionar o arquivo de remessa para filtrar</label>
+        <div className='flex flex-col justify-center items-center gap-3'>
+          <label htmlFor="remessa-file" className='text-xl mb-2 cursor-pointer'>Selecionar o arquivo de remessa para filtrar</label>
           <input
             type="file"
             id='remessa-file'
@@ -76,8 +87,9 @@ const App = () => {
           </label>
         </div>
 
-        <div className='flex flex-col justify-center items-center gap-2'>
-          <label htmlFor="cnpj-file" className='text-xl mb-2'>Selecionar o arquivo com os CNPJ's a filtrar</label>
+        <div className='flex flex-col justify-center items-center gap-1'>
+          <label htmlFor="cnpj-file" className='text-xl cursor-pointer'>Selecionar o arquivo com os CNPJ's a filtrar</label>
+          <span className='text-sm font-medium text-red-600'>Somente formato .CSV</span>
           <input
             type="file"
             id="cnpj-file"
@@ -96,21 +108,23 @@ const App = () => {
       
       <span className='py-[1px] rounded-lg bg-gradient-to-r from-[#0F2E99] to-[#39B1E3] w-[90%]'></span>
 
-      {nomeRemessa && <p>Arquivo carregado: {nomeRemessa}</p>}
+      {nomeRemessa && <p className='font-semibold'>Arquivo carregado: {nomeRemessa}</p>}
       {remessa && (
-        <div className='flex flex-col justify-center items-center gap-2'>
+        <div className='flex flex-col justify-center items-center gap-2 w-[90%] border text-center overflow-x-auto py-2'>
           <h3>Conteúdo do Arquivo:</h3>
-          <pre>{remessa}</pre>
+          <pre className='w-full'>{remessa}</pre>
         </div>
       )}
 
       <button 
-        className='bg-gradient-to-r from-[#0F2E99] to-[#39B1E3] text-white p-3 rounded-lg'
-        onClick={handleDownload}
+        className='w-[20%] bg-[#39B1E3] text-white p-3 rounded-lg hover:bg-[#50a6ce]  transition-all duration-300'
+        onClick={handleSendFile}
       >
-        Download arquivo filtrado
+        Enviar Arquivo
       </button>
-    </body>
+
+      <ToastContainer />
+    </div>
   );
 };
 
