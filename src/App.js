@@ -35,7 +35,8 @@ const App = () => {
       });
 
       if (response.status === 200) {
-        toast.success('Arquivo processado com sucesso. O arquivo foi salvo na pasta Downloads.');
+        console.log(response.data)
+        toast.success(`Arquivo processado com sucesso!`);
       }
     } catch (error) {
       toast.error('Erro ao processar os arquivos.');
