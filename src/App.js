@@ -29,7 +29,7 @@ const App = () => {
       return;
     } 
     try {
-      const response = await axios.post('http://192.168.10.33:3001/upload-arquivos', {
+      const response = await axios.post('http://192.168.10.14:3001/upload-arquivos', {
         remessa,
         nomeRemessa,
       });
