@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const App = () => {
   const [remessa, setRemessa] = useState('');
   const [nomeRemessa, setNomeRemessa] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRemessaFileUpload = (event) => {
     const file = event.target.files[0];
@@ -24,23 +25,26 @@ const App = () => {
 
 
   const handleSendFile = async () => {
-    if (!remessa){
+    if (!remessa) {
       toast.error('Por favor, selecione todos os campos');
       return;
-    } 
+    }
     try {
+      setIsLoading(true);
       const response = await axios.post('http://192.168.10.14:3001/upload-arquivos', {
         remessa,
         nomeRemessa,
       });
 
       if (response.status === 200) {
-        toast.success('Arquivo processado com sucesso. O arquivo foi salvo na pasta Downloads.');
+        const { data } = response;
+        toast.success(`${data.message}`);
       }
     } catch (error) {
       toast.error('Erro ao processar os arquivos.');
       console.error('Erro ao fazer a requisição:', error);
     }
+    setIsLoading(false);
   };
 
   return (
@@ -70,7 +74,7 @@ const App = () => {
         </div>
 
       </section>
-      
+
       <span className='py-[1px] rounded-lg bg-gradient-to-r from-[#0F2E99] to-[#39B1E3] w-[90%]'></span>
 
       {nomeRemessa && <p className='font-semibold'>Arquivo carregado: {nomeRemessa}</p>}
@@ -81,13 +85,27 @@ const App = () => {
         </div>
       )}
 
-      {remessa && (
-        <button
-          onClick={handleSendFile}
-          className='w-[20%] py-3 rounded-lg bg-[#39B1E3] text-white hover:bg-[#50a6ce] hover:text-white transition-all duration-300'
-        >
-          Enviar Arquivo
-        </button>
+      {!isLoading ? remessa && (
+          <button
+            type="button"
+            onClick={handleSendFile}
+            className="w-[20%] py-3 rounded-lg bg-[#39B1E3] text-white 
+            hover:bg-[#50a6ce] hover:text-white transition-all duration-300 flex justify-center items-center text-2xl"
+          >
+            Enviar
+          </button>
+        
+      ) : remessa && (
+        <button type="button" class="w-[20%] py-3 rounded-lg bg-[#39B1E3] text-white 
+            hover:bg-[#50a6ce] hover:text-white transition-all duration-300 cursor-not-allowed flex justify-center items-center text-2xl">
+  
+            <svg class="animate-spin h-10 w-10 mr-3 ..." viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+  
+            </svg>
+            Processando...
+          </button>
       )}
 
       <ToastContainer />
